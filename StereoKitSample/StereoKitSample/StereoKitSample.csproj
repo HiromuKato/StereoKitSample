@@ -16,11 +16,108 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Assets\BlipNoise.wav" />
+    <None Remove="Assets\Clipboard.glb" />
+    <None Remove="Assets\Cosmonaut.glb" />
+    <None Remove="Assets\cube.obj" />
+    <None Remove="Assets\DamagedHelmet.gltf" />
     <None Remove="Assets\floor.hlsl" />
+    <None Remove="Assets\floor.png" />
+    <None Remove="Assets\floor_shader.hlsl" />
+    <None Remove="Assets\metal_plate_diff.jpg" />
+    <None Remove="Assets\metal_plate_metal.jpg" />
+    <None Remove="Assets\mic_icon.png" />
+    <None Remove="Assets\old_depot.hdr" />
+    <None Remove="Assets\Palette.glb" />
+    <None Remove="Assets\power.png" />
+    <None Remove="Assets\Radio.glb" />
+    <None Remove="Assets\StereoKitWide.png" />
+    <None Remove="Assets\suzanne.mtl" />
+    <None Remove="Assets\suzanne.obj" />
+    <None Remove="Assets\suzanne_ascii.stl" />
+    <None Remove="Assets\suzanne_bin.stl" />
+    <None Remove="Assets\test.png" />
+    <None Remove="Assets\test_normal.png" />
+    <None Remove="Assets\UVTex.png" />
+    <None Remove="Assets\Wand.glb" />
   </ItemGroup>
 
   <ItemGroup>
-    <SKShader Include="Assets\floor.hlsl" />
+    <Content Include="Assets\BlipNoise.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Clipboard.glb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Cosmonaut.glb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\cube.obj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\DamagedHelmet.gltf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\floor.hlsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\floor.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\floor_shader.hlsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\metal_plate_diff.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\metal_plate_metal.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\mic_icon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\old_depot.hdr">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Palette.glb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\power.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Radio.glb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\StereoKitWide.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\suzanne.mtl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\suzanne.obj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\suzanne_ascii.stl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\suzanne_bin.stl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\test.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\test_normal.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\UVTex.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Wand.glb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
