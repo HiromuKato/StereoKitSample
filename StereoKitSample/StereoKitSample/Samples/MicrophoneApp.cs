@@ -5,6 +5,7 @@ namespace StereoKitSample.Samples
 {
     /// <summary>
     /// マイクを利用するサンプル
+    /// （Package.appxmanifest の 機能 > マイク にチェックを入れる）
     /// </summary>
     class MicrophoneApp : IApp
     {
