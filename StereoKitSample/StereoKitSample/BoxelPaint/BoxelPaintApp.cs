@@ -22,10 +22,13 @@ namespace StereoKitSample.BoxelPaint
 
         // グリッド
         private Color gridColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
-        private int gridMaxCount = 8;
+        private static int gridMaxNum = 8;
+        private int gridNum = 8;
 
         // 描画内容を保持したリスト
         private List<CubeData> cubeData = new List<CubeData>();
+        // ペイント済みかどうかを格納する
+        private bool[,,] painted = new bool[gridMaxNum, gridMaxNum, gridMaxNum];
 
         public void Initialize()
         {
@@ -43,18 +46,71 @@ namespace StereoKitSample.BoxelPaint
             UI.HandleBegin("PaintingRoot", ref _pose, new Bounds(Vec3.One * 5 * U.cm), true);
             {
                 DrawGrid();
+
+                // ピンチ操作のチェック
+                PaintCube();
+
+                // キューブの描画
+                foreach (var data in cubeData)
+                {
+                    data.mesh.Draw(data.material, data.pose.ToMatrix(1));
+                }
             }
             UI.HandleEnd();
-
-            // キューブの描画
-            foreach (var data in cubeData)
-            {
-                data.mesh.Draw(data.material, data.pose.ToMatrix(1));
-            }
         }
 
         public void Shutdown()
         {
+        }
+
+        private void PaintCube()
+        {
+            Hand hand = Input.Hand(Handed.Right);
+            if (!hand.IsPinched)
+            {
+                return;
+            }
+            Vec3 fingertip = hand[FingerId.Index, JointId.Tip].position;
+            fingertip = Hierarchy.ToLocal(fingertip);
+
+            // ピンチ操作時にグリッド内に人差し指がある場合の処理
+            for (int z = 0; z < gridNum; z++)
+            {
+                for (int y = 0; y < gridNum; y++)
+                {
+                    for (int x = 0; x < gridNum; x++)
+                    {
+                        // 既に描画済みの場合はスキップ
+                        if (painted[x, y, z] == true)
+                        {
+                            continue;
+                        }
+
+                        // 各グリッド(5cm幅)の中心
+                        Vec3 center = new Vec3(x * 5 * U.cm + 2.5f * U.cm, y * 5 * U.cm + 2.5f * U.cm, z * 5 * U.cm + 2.5f * U.cm);
+                        Bounds genVolume = new Bounds(center, new Vec3(5 * U.cm, 5 * U.cm, 5 * U.cm));
+                        bool contains = genVolume.Contains(fingertip);
+                        if (contains)
+                        {
+                            Log.Info(x + ", " + y + ", " + z);
+                            // 描画されたフラグを立てる
+                            painted[x, y, z] = true;
+
+                            // Cubeメッシュ生成
+                            var mesh = Mesh.GenerateCube(Vec3.One * 5 * U.cm);
+                            var data = new CubeData();
+                            data.pose = new Pose(center, Quat.Identity);
+                            var colorMat = Default.Material.Copy();
+                            colorMat[MatParamName.ColorTint] = selectedColor;
+                            data.material = colorMat;
+                            data.mesh = mesh;
+                            cubeData.Add(data);
+                        }
+                    }
+                }
+            }
+
+
         }
 
         /// <summary>
@@ -96,6 +152,17 @@ namespace StereoKitSample.BoxelPaint
                 if (UI.Button("Clear"))
                 {
                     cubeData.Clear();
+
+                    for (int z = 0; z < gridNum; z++)
+                    {
+                        for (int y = 0; y < gridNum; y++)
+                        {
+                            for (int x = 0; x < gridNum; x++)
+                            {
+                                painted[x, y, z] = false;
+                            }
+                        }
+                    }
                 }
 
 
@@ -104,7 +171,7 @@ namespace StereoKitSample.BoxelPaint
                 UI.SameLine();
                 if (UI.HSlider("Grid", ref sliderValue, 2, 8, 1, 16 * U.cm, UIConfirm.Pinch))
                 {
-                    gridMaxCount = (int)sliderValue;
+                    gridNum = (int)sliderValue;
                 }
             }
             // メニューウィンドウを終了する
@@ -117,7 +184,7 @@ namespace StereoKitSample.BoxelPaint
         private void DrawGrid()
         {
             // 変換マトリクスをスタックにプッシュ（以降、Pop まで相対的な変換になる）
-            Hierarchy.Push(Matrix.TRS(V.XYZ(0, 0, -0.4f), Quat.LookDir(0, 0, -1), 1));
+            //Hierarchy.Push(Matrix.TRS(V.XYZ(0, 0, -0.4f), Quat.LookDir(0, 0, -1), 1));
             {
                 var gridScale = 5 * U.cm;
 
@@ -125,26 +192,26 @@ namespace StereoKitSample.BoxelPaint
                 Lines.AddAxis(new Pose(0, 0, 0, Quat.Identity), 5 * U.cm);
                 Text.Add("グリッド原点", Matrix.R(0, 180, 0));
 
-                for (int z = 0; z <= gridMaxCount; z++)
+                for (int z = 0; z <= gridNum; z++)
                 {
-                    for (int y = 0; y <= gridMaxCount; y++)
+                    for (int y = 0; y <= gridNum; y++)
                     {
-                        for (int x = 0; x <= gridMaxCount; x++)
+                        for (int x = 0; x <= gridNum; x++)
                         {
                             Vec3 pos1 = new Vec3(0, y, z) * gridScale;
-                            Vec3 pos2 = new Vec3(gridMaxCount, y, z) * gridScale;
+                            Vec3 pos2 = new Vec3(gridNum, y, z) * gridScale;
                             var p1 = new LinePoint { pt = pos1, color = gridColor, thickness = U.mm };
                             var p2 = new LinePoint { pt = pos2, color = gridColor, thickness = U.mm };
                             Lines.Add(new LinePoint[] { p1, p2 });
 
                             pos1 = new Vec3(x, 0, z) * gridScale;
-                            pos2 = new Vec3(x, gridMaxCount, z) * gridScale;
+                            pos2 = new Vec3(x, gridNum, z) * gridScale;
                             p1 = new LinePoint { pt = pos1, color = gridColor, thickness = U.mm };
                             p2 = new LinePoint { pt = pos2, color = gridColor, thickness = U.mm };
                             Lines.Add(new LinePoint[] { p1, p2 });
 
                             pos1 = new Vec3(x, y, 0) * gridScale;
-                            pos2 = new Vec3(x, y, gridMaxCount) * gridScale;
+                            pos2 = new Vec3(x, y, gridNum) * gridScale;
                             p1 = new LinePoint { pt = pos1, color = gridColor, thickness = U.mm };
                             p2 = new LinePoint { pt = pos2, color = gridColor, thickness = U.mm };
                             Lines.Add(new LinePoint[] { p1, p2 });
@@ -152,7 +219,7 @@ namespace StereoKitSample.BoxelPaint
                     }
                 }
             }
-            Hierarchy.Pop();
+            //Hierarchy.Pop();
         }
     }
 }
