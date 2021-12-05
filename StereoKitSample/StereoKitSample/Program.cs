@@ -6,13 +6,14 @@ namespace StereoKitSample
 {
     /*
      * PC での操作
-     * 参考：https://github.com/maluoi/StereoKit/blob/master/StereoKitC/systems/platform/flatscreen_input.cpp
+     * 参考：https://stereokit.net/Pages/Guides/Using-The-Simulator.html
      *  - マウスの移動：手の上下左右移動
      *  - マウスホイール：手の奥行き移動
      *  - マウスの左クリック：つかむ
      *  - マウスの右クリック：つつく
-     *  - Shift(またはCaps Lock) + マウスの右クリック + マウスの移動：カメラの回転
-     *  - Shift(またはCaps Lock) + W A S D Q Eキー：カメラの移動
+     *  - マウスの左クリック + 右クリック：手を閉じる
+     *  - Shift(またはCaps Lock) + マウスの右クリック + マウスの移動：頭の回転
+     *  - Shift(またはCaps Lock) + W A S D Q Eキー：頭の移動
      *  - Alt + マウス操作：アイトラッキングのシミュレート
      */
     class Program

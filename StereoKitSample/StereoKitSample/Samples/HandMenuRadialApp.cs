@@ -14,6 +14,9 @@ namespace StereoKitSample.Samples
 
         public void Initialize()
         {
+            // ステッパーはIStepperインターフェイスを実装するクラス
+            // StereoKitのステッパーリストに追加するとステッパーのStepメソッドが毎フレーム呼ばれるようになる
+            // 登録だけしておけば後は操作する必要がない場合に有効な手段
             handMenu = SK.AddStepper(new HandMenuRadial(
                 new HandRadialLayer("Root",
                     new HandMenuItem("File", null, () => text = "File", "File"),
@@ -41,6 +44,7 @@ namespace StereoKitSample.Samples
 
         public void Shutdown()
         {
+            // ステッパーリストから削除する
             SK.RemoveStepper(handMenu);
         }
     }
