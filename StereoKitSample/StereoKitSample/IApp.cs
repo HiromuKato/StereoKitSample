@@ -1,4 +1,4 @@
-﻿namespace StereoKitSample.Samples
+﻿namespace StereoKitSample
 {
     interface IApp
     {
