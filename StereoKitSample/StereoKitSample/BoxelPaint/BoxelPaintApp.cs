@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 using StereoKit;
 
 namespace StereoKitSample.BoxelPaint
@@ -293,45 +294,98 @@ namespace StereoKitSample.BoxelPaint
         /// </summary>
         private void OnExportObj()
         {
+            Vec3[] basevVecs_v = new Vec3[]
+            {
+                new Vec3( -1.000000f, -1.000000f,  1.000000f ),
+                new Vec3( -1.000000f,  1.000000f,  1.000000f ),
+                new Vec3( -1.000000f, -1.000000f, -1.000000f ),
+                new Vec3( -1.000000f,  1.000000f, -1.000000f ),
+                new Vec3(  1.000000f, -1.000000f,  1.000000f ),
+                new Vec3(  1.000000f,  1.000000f,  1.000000f ),
+                new Vec3(  1.000000f, -1.000000f, -1.000000f ),
+                new Vec3(  1.000000f,  1.000000f, -1.000000f ),
+            };
+
+            Vec3[] basevVecs_vn = new Vec3[]
+            {
+                new Vec3(-1.0000f, 0.0000f, 0.0000f),
+                new Vec3(0.0000f, 0.0000f, -1.0000f),
+                new Vec3(1.0000f, 0.0000f, 0.0000f),
+                new Vec3(0.0000f, 0.0000f, 1.0000f),
+                new Vec3(0.0000f, -1.0000f, 0.0000f),
+                new Vec3(0.0000f, 1.0000f, 0.0000f)
+            };
+
+            string[] basevVecs_f = new string[]
+            {
+                "2//1 3//1 1//1",
+                "4//2 7//2 3//2",
+                "8//3 5//3 7//3",
+                "6//4 1//4 5//4",
+                "7//5 1//5 3//5",
+                "4//6 6//6 8//6",
+                "2//1 4//1 3//1",
+                "4//2 8//2 7//2",
+                "8//3 6//3 5//3",
+                "6//4 2//4 1//4",
+                "7//5 5//5 1//5",
+                "4//6 2//6 6//6"
+            };
+
+            string filename = "test";
+            int index = 0;
+            string matName = "BlueMaterial";
+
+            StringBuilder sb = new StringBuilder("# Exported from BoxelModeler\n");
+            sb.Append("mtllib " + filename + ".mtl\n");
+
+            sb.Append("o cube" + index + "\n");
+            sb.Append("v " + basevVecs_v[0].x + " " + basevVecs_v[0].y + " " + basevVecs_v[0].z + "\n");
+            sb.Append("v " + basevVecs_v[1].x + " " + basevVecs_v[1].y + " " + basevVecs_v[1].z + "\n");
+            sb.Append("v " + basevVecs_v[2].x + " " + basevVecs_v[2].y + " " + basevVecs_v[2].z + "\n");
+            sb.Append("v " + basevVecs_v[3].x + " " + basevVecs_v[3].y + " " + basevVecs_v[3].z + "\n");
+            sb.Append("v " + basevVecs_v[4].x + " " + basevVecs_v[4].y + " " + basevVecs_v[4].z + "\n");
+            sb.Append("v " + basevVecs_v[5].x + " " + basevVecs_v[5].y + " " + basevVecs_v[5].z + "\n");
+            sb.Append("v " + basevVecs_v[6].x + " " + basevVecs_v[6].y + " " + basevVecs_v[6].z + "\n");
+            sb.Append("v " + basevVecs_v[7].x + " " + basevVecs_v[7].y + " " + basevVecs_v[7].z + "\n");
+
+            sb.Append("vn " + basevVecs_vn[0].x + " " + basevVecs_vn[0].y + " " + basevVecs_vn[0].z + "\n");
+            sb.Append("vn " + basevVecs_vn[1].x + " " + basevVecs_vn[1].y + " " + basevVecs_vn[1].z + "\n");
+            sb.Append("vn " + basevVecs_vn[2].x + " " + basevVecs_vn[2].y + " " + basevVecs_vn[2].z + "\n");
+            sb.Append("vn " + basevVecs_vn[3].x + " " + basevVecs_vn[3].y + " " + basevVecs_vn[3].z + "\n");
+            sb.Append("vn " + basevVecs_vn[4].x + " " + basevVecs_vn[4].y + " " + basevVecs_vn[4].z + "\n");
+            sb.Append("vn " + basevVecs_vn[5].x + " " + basevVecs_vn[5].y + " " + basevVecs_vn[5].z + "\n");
+
+            sb.Append("usemtl " + matName + "\n");
+
+            sb.Append("f " + basevVecs_f[0] + "\n");
+            sb.Append("f " + basevVecs_f[1] + "\n");
+            sb.Append("f " + basevVecs_f[2] + "\n");
+            sb.Append("f " + basevVecs_f[3] + "\n");
+            sb.Append("f " + basevVecs_f[4] + "\n");
+            sb.Append("f " + basevVecs_f[5] + "\n");
+            sb.Append("f " + basevVecs_f[6] + "\n");
+            sb.Append("f " + basevVecs_f[7] + "\n");
+            sb.Append("f " + basevVecs_f[8] + "\n");
+            sb.Append("f " + basevVecs_f[9] + "\n");
+            sb.Append("f " + basevVecs_f[10] + "\n");
+            sb.Append("f " + basevVecs_f[11] + "\n");
+
             // cubeData から obj ファイルを生成する
-            string modelData =
-@"# Blender v2.79 (sub 0) OBJ File: ''
-# www.blender.org
-mtllib cube_obj_test.mtl
-o Cube_Cube.001
-v -1.000000 -1.000000 1.000000
-v -1.000000 1.000000 1.000000
-v -1.000000 -1.000000 -1.000000
-v -1.000000 1.000000 -1.000000
-v 1.000000 -1.000000 1.000000
-v 1.000000 1.000000 1.000000
-v 1.000000 -1.000000 -1.000000
-v 1.000000 1.000000 -1.000000
-vn -1.0000 0.0000 0.0000
-vn 0.0000 0.0000 -1.0000
-vn 1.0000 0.0000 0.0000
-vn 0.0000 0.0000 1.0000
-vn 0.0000 -1.0000 0.0000
-vn 0.0000 1.0000 0.0000
-usemtl None
-s off
-f 2//1 3//1 1//1
-f 4//2 7//2 3//2
-f 8//3 5//3 7//3
-f 6//4 1//4 5//4
-f 7//5 1//5 3//5
-f 4//6 6//6 8//6
-f 2//1 4//1 3//1
-f 4//2 8//2 7//2
-f 8//3 6//3 5//3
-f 6//4 2//4 1//4
-f 7//5 5//5 1//5
-f 4//6 2//6 6//6";
+            foreach (var data in cubeData)
+            {
+                /*
+                data.pos;
+                data.color;
+                data.mesh.GetVerts;
+                */
+            }
+            Log.Info(sb.ToString());
 
             Platform.FilePicker(PickerMode.Save, file =>
-            {
-                Platform.WriteFile(file, modelData);
-            }, null, ".obj");
+                {
+                    Platform.WriteFile(file + ".obj", sb.ToString());
+                }, null, ".obj");
         }
 
     } // class BoxelPaintApp
