@@ -294,6 +294,8 @@ namespace StereoKitSample.BoxelPaint
         /// </summary>
         private void OnExportObj()
         {
+            // Cubeの形状しかないため簡易的なエクスポート処理
+            // 一般的なobjのエクスポートで利用できるものではない
             Vec3[] baseVecs_v = new Vec3[]
             {
                 new Vec3( -1.000000f, -1.000000f,  1.000000f ),
@@ -316,23 +318,6 @@ namespace StereoKitSample.BoxelPaint
                 new Vec3(0.0000f, 1.0000f, 0.0000f)
             };
 
-            /*
-            string[] baseVecs_f = new string[]
-            {
-                "2//1 3//1 1//1",
-                "4//2 7//2 3//2",
-                "8//3 5//3 7//3",
-                "6//4 1//4 5//4",
-                "7//5 1//5 3//5",
-                "4//6 6//6 8//6",
-                "2//1 4//1 3//1",
-                "4//2 8//2 7//2",
-                "8//3 6//3 5//3",
-                "6//4 2//4 1//4",
-                "7//5 5//5 1//5",
-                "4//6 2//6 6//6"
-            };
-            */
             Vec3[] baseVecs_fv = new Vec3[]
             {
                 new Vec3(2, 3, 1),
@@ -362,26 +347,26 @@ namespace StereoKitSample.BoxelPaint
                 new Vec3(4, 4, 4),
                 new Vec3(5, 5, 5),
                 new Vec3(6, 6, 6),
-};
+            };
 
             string filename = "test";
             int index = 0;
-            string matName = "BlueMaterial";
+            string matName = "WhiteMaterial";
 
             StringBuilder sb = new StringBuilder("# Exported from BoxelModeler\n");
             sb.Append("mtllib " + filename + ".mtl\n");
 
-            for (int i = 0; i < 2; i++)
+            // cubeData から obj ファイルを生成する
+            foreach (var data in cubeData)
             {
-                sb.Append("o cube" + index + "\n");
-                sb.Append(Calc_v(baseVecs_v[0], index));
-                sb.Append(Calc_v(baseVecs_v[1], index));
-                sb.Append(Calc_v(baseVecs_v[2], index));
-                sb.Append(Calc_v(baseVecs_v[3], index));
-                sb.Append(Calc_v(baseVecs_v[4], index));
-                sb.Append(Calc_v(baseVecs_v[5], index));
-                sb.Append(Calc_v(baseVecs_v[6], index));
-                sb.Append(Calc_v(baseVecs_v[7], index));
+                sb.Append(Calc_v(baseVecs_v[0], data.pos, index));
+                sb.Append(Calc_v(baseVecs_v[1], data.pos, index));
+                sb.Append(Calc_v(baseVecs_v[2], data.pos, index));
+                sb.Append(Calc_v(baseVecs_v[3], data.pos, index));
+                sb.Append(Calc_v(baseVecs_v[4], data.pos, index));
+                sb.Append(Calc_v(baseVecs_v[5], data.pos, index));
+                sb.Append(Calc_v(baseVecs_v[6], data.pos, index));
+                sb.Append(Calc_v(baseVecs_v[7], data.pos, index));
 
                 sb.Append("vn " + baseVecs_vn[0].x + " " + baseVecs_vn[0].y + " " + baseVecs_vn[0].z + "\n");
                 sb.Append("vn " + baseVecs_vn[1].x + " " + baseVecs_vn[1].y + " " + baseVecs_vn[1].z + "\n");
@@ -390,7 +375,9 @@ namespace StereoKitSample.BoxelPaint
                 sb.Append("vn " + baseVecs_vn[4].x + " " + baseVecs_vn[4].y + " " + baseVecs_vn[4].z + "\n");
                 sb.Append("vn " + baseVecs_vn[5].x + " " + baseVecs_vn[5].y + " " + baseVecs_vn[5].z + "\n");
 
+                matName = GetMaterialName(data.color);
                 sb.Append("usemtl " + matName + "\n");
+                sb.Append("s off\n");
 
                 sb.Append(Calc_f(baseVecs_fv[0], baseVecs_fn[0], index));
                 sb.Append(Calc_f(baseVecs_fv[1], baseVecs_fn[1], index));
@@ -407,15 +394,6 @@ namespace StereoKitSample.BoxelPaint
                 index++;
             }
 
-            // cubeData から obj ファイルを生成する
-            foreach (var data in cubeData)
-            {
-                /*
-                data.pos;
-                data.color;
-                data.mesh.GetVerts;
-                */
-            }
             Log.Info(sb.ToString());
 
             Platform.FilePicker(PickerMode.Save, file =>
@@ -424,9 +402,14 @@ namespace StereoKitSample.BoxelPaint
                 }, null, ".obj");
         }
 
-        private string Calc_v(Vec3 v, int index)
+        private string Calc_v(Vec3 v, Vec3 pos, int index)
         {
-            var str = "v " + (v.x + index) + " " + (v.y + index) + " " + (v.z + index) + "\n";
+            v = v * 2.5f * U.cm;
+            float x = (pos.x - 2.5f * U.cm) / (5 * U.cm);
+            float y = (pos.y - 2.5f * U.cm) / (5 * U.cm);
+            float z = (pos.z - 2.5f * U.cm) / (5 * U.cm);
+
+            var str = "v " + (v.x + x * 5 * U.cm) + " " + (v.y + y * 5 * U.cm) + " " + (v.z + z * 5 * U.cm) + "\n";
             return str;
         }
 
@@ -437,6 +420,27 @@ namespace StereoKitSample.BoxelPaint
                 (int)(fv.y + index * 8) + "//" + (int)(fn.y + index * 6) + " " +
                 (int)(fv.z + index * 8) + "//" + (int)(fn.z + index * 6) + "\n";
             return str;
+        }
+
+        private string GetMaterialName(Color color)
+        {
+            if (color.r == 1 && color.g == 1 && color.b == 1)
+            {
+                return "WhiteMaterial";
+            }
+            else if (color.r == 1 && color.g == 0 && color.b == 0)
+            {
+                return "RedMaterial";
+            }
+            else if (color.r == 0 && color.g == 1 && color.b == 0)
+            {
+                return "GreenMaterial";
+            }
+            else if (color.r == 0 && color.g == 0 && color.b == 1)
+            {
+                return "BlueMaterial";
+            }
+            return "WhiteMaterial";
         }
 
     } // class BoxelPaintApp
