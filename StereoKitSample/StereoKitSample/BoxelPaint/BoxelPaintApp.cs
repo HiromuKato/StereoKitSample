@@ -5,9 +5,10 @@ namespace StereoKitSample.BoxelPaint
 {
     class BoxelPaintApp : IApp
     {
-        struct CubeData
+        class CubeData
         {
-            public Pose pose;
+            public Vec3 pos;
+            public Color color;
             public Material material;
             public Mesh mesh;
         }
@@ -19,6 +20,7 @@ namespace StereoKitSample.BoxelPaint
         private Pose menuPose = new Pose(0, 0, -0.5f, Quat.LookDir(0, 0, 1));
         private float sliderValue = 8;
         private Color selectedColor = new Color(1, 1, 1, 1);
+        private bool isErase = false;
 
         // グリッド
         private Color gridColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
@@ -30,15 +32,24 @@ namespace StereoKitSample.BoxelPaint
         // ペイント済みかどうかを格納する
         private bool[,,] painted = new bool[gridMaxNum, gridMaxNum, gridMaxNum];
 
+        // カラー
+        Color red = new Color(1, 0, 0, 1);
+        Color green = new Color(0, 1, 0, 1);
+        Color blue = new Color(0, 0, 1, 1);
+        Color white = new Color(1, 1, 1, 1);
+        Color black = new Color(0, 0, 0, 1);
+
         public void Initialize()
         {
         }
 
         public void Update()
         {
+            /*
             // ワールド座標原点
             Lines.AddAxis(new Pose(0, 0, 0, Quat.Identity), 5 * U.cm);
             Text.Add("ワールド座標原点", Matrix.Identity);
+            */
 
             DrawMenu();
 
@@ -53,7 +64,7 @@ namespace StereoKitSample.BoxelPaint
                 // キューブの描画
                 foreach (var data in cubeData)
                 {
-                    data.mesh.Draw(data.material, data.pose.ToMatrix(1));
+                    data.mesh.Draw(data.material, Matrix.T(data.pos));
                 }
             }
             UI.HandleEnd();
@@ -73,44 +84,68 @@ namespace StereoKitSample.BoxelPaint
             Vec3 fingertip = hand[FingerId.Index, JointId.Tip].position;
             fingertip = Hierarchy.ToLocal(fingertip);
 
-            // ピンチ操作時にグリッド内に人差し指がある場合の処理
-            for (int z = 0; z < gridNum; z++)
+            if (isErase)
             {
-                for (int y = 0; y < gridNum; y++)
+                foreach (var data in cubeData)
                 {
-                    for (int x = 0; x < gridNum; x++)
+                    Bounds genVolume = new Bounds(data.pos, new Vec3(5 * U.cm, 5 * U.cm, 5 * U.cm));
+                    bool contains = genVolume.Contains(fingertip);
+                    if (contains)
                     {
-                        // 既に描画済みの場合はスキップ
-                        if (painted[x, y, z] == true)
+                        float x = (data.pos.x - 2.5f * U.cm) / (5 * U.cm);
+                        float y = (data.pos.y - 2.5f * U.cm) / (5 * U.cm);
+                        float z = (data.pos.z - 2.5f * U.cm) / (5 * U.cm);
+                        /*
+                        Log.Info("pos: " + data.pos.x + ", " + data.pos.y + ", " + data.pos.z);
+                        Log.Info(((data.pos.x - 2.5f * U.cm) / 5 * U.cm).ToString());
+                        Log.Info("Erase: " + x + ", " + y + ", " + z);
+                        */
+                        painted[(int)x, (int)y, (int)z] = false;
+                        cubeData.Remove(data);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                // ピンチ操作時にグリッド内に人差し指がある場合の処理
+                for (int z = 0; z < gridNum; z++)
+                {
+                    for (int y = 0; y < gridNum; y++)
+                    {
+                        for (int x = 0; x < gridNum; x++)
                         {
-                            continue;
-                        }
+                            // 既に描画済みの場合はスキップ
+                            if (painted[x, y, z] == true)
+                            {
+                                continue;
+                            }
 
-                        // 各グリッド(5cm幅)の中心
-                        Vec3 center = new Vec3(x * 5 * U.cm + 2.5f * U.cm, y * 5 * U.cm + 2.5f * U.cm, z * 5 * U.cm + 2.5f * U.cm);
-                        Bounds genVolume = new Bounds(center, new Vec3(5 * U.cm, 5 * U.cm, 5 * U.cm));
-                        bool contains = genVolume.Contains(fingertip);
-                        if (contains)
-                        {
-                            Log.Info(x + ", " + y + ", " + z);
-                            // 描画されたフラグを立てる
-                            painted[x, y, z] = true;
+                            // 各グリッド(5cm幅)の中心
+                            Vec3 center = new Vec3(x * 5 * U.cm + 2.5f * U.cm, y * 5 * U.cm + 2.5f * U.cm, z * 5 * U.cm + 2.5f * U.cm);
+                            Bounds genVolume = new Bounds(center, new Vec3(5 * U.cm, 5 * U.cm, 5 * U.cm));
+                            bool contains = genVolume.Contains(fingertip);
+                            if (contains)
+                            {
+                                Log.Info(x + ", " + y + ", " + z);
+                                // 描画されたフラグを立てる
+                                painted[x, y, z] = true;
 
-                            // Cubeメッシュ生成
-                            var mesh = Mesh.GenerateCube(Vec3.One * 5 * U.cm);
-                            var data = new CubeData();
-                            data.pose = new Pose(center, Quat.Identity);
-                            var colorMat = Default.Material.Copy();
-                            colorMat[MatParamName.ColorTint] = selectedColor;
-                            data.material = colorMat;
-                            data.mesh = mesh;
-                            cubeData.Add(data);
+                                // Cubeメッシュ生成
+                                var mesh = Mesh.GenerateCube(Vec3.One * 5 * U.cm);
+                                var data = new CubeData();
+                                data.pos = center;
+                                data.color = selectedColor;
+                                var colorMat = Default.Material.Copy();
+                                colorMat[MatParamName.ColorTint] = selectedColor;
+                                data.material = colorMat;
+                                data.mesh = mesh;
+                                cubeData.Add(data);
+                            }
                         }
                     }
                 }
             }
-
-
         }
 
         /// <summary>
@@ -121,35 +156,29 @@ namespace StereoKitSample.BoxelPaint
             // メニューウィンドウを開始する
             UI.WindowBegin("Menu", ref menuPose, UIWin.Normal);
             {
+                if (UI.Button("Red")) { selectedColor = red; isErase = false; }
+                UI.SameLine();
+                if (UI.Button("Green")) { selectedColor = green; isErase = false; }
+                UI.SameLine();
+                if (UI.Button("Blue")) { selectedColor = blue; isErase = false; }
+                UI.SameLine();
+                if (UI.Button("White")) { selectedColor = white; isErase = false; }
+                UI.SameLine();
+                if (UI.Button("Erase")) { selectedColor = black; isErase = true; }
+                UI.HSeparator();
+
                 // ボタンの追加
                 if (UI.Button("Save"))
                 {
-                    selectedColor = new Color(1, 0, 0, 1);
                 }
                 // 同じ行にボタンを追加
                 UI.SameLine();
                 if (UI.Button("Load"))
                 {
-                    selectedColor = new Color(0, 0, 1, 1);
                 }
 
                 UI.SameLine();
-                if (UI.Button("Add"))
-                {
-                    // 右手人差し指の位置取得
-                    Pose indexPose = Input.Hand(Handed.Right)[FingerId.Index, JointId.Tip].Pose;
-
-                    // Cubeメッシュ生成
-                    var mesh = Mesh.GenerateCube(Vec3.One * 5 * U.cm);
-                    var data = new CubeData();
-                    data.pose = indexPose;
-                    var colorMat = Default.Material.Copy();
-                    colorMat[MatParamName.ColorTint] = selectedColor;
-                    data.material = colorMat;
-                    data.mesh = mesh;
-                    cubeData.Add(data);
-                }
-                if (UI.Button("Clear"))
+                if (UI.Button("All Clear"))
                 {
                     cubeData.Clear();
 
@@ -221,5 +250,6 @@ namespace StereoKitSample.BoxelPaint
             }
             //Hierarchy.Pop();
         }
-    }
-}
+
+    } // class BoxelPaintApp
+} // namespace StereoKitSample.BoxelPaint
