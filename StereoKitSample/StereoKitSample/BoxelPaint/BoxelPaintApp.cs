@@ -230,7 +230,7 @@ namespace StereoKitSample.BoxelPaint
 
                 // グリッドの原点
                 Lines.AddAxis(new Pose(0, 0, 0, Quat.Identity), 5 * U.cm);
-                Text.Add("グリッド原点", Matrix.R(0, 180, 0));
+                //Text.Add("グリッド原点", Matrix.R(0, 180, 0));
 
                 for (int z = 0; z <= gridNum; z++)
                 {
@@ -273,8 +273,72 @@ namespace StereoKitSample.BoxelPaint
                 if (Platform.ReadFile(file, out string text))
                 {
                     Log.Info(text);
+                    LoadDataFromText(text);
                 }
-            }, null, ".bxp");
+            }, null, ".bxm");
+        }
+
+        CubeData tmpCubeData = null;
+        private void LoadDataFromText(string text)
+        {
+            for (int z = 0; z < gridNum; z++)
+            {
+                for (int y = 0; y < gridNum; y++)
+                {
+                    for (int x = 0; x < gridNum; x++)
+                    {
+                        painted[x, y, z] = false;
+                    }
+                }
+            }
+            cubeData.Clear();
+
+            var lines = text.Split("\n");
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (i == 0) continue;
+
+                var line = lines[i];
+                var words = line.Split(' ');
+                if (words[0] == "p")
+                {
+                    // データ生成
+                    tmpCubeData = new CubeData();
+
+                    float x = float.Parse(words[1]);
+                    float y = float.Parse(words[2]);
+                    float z = float.Parse(words[3]);
+                    tmpCubeData.pos = new Vec3(x, y, z);
+
+                    // TODO :  painted[x, y, z] = true の設定
+                }
+                else if (words[0] == "c")
+                {
+                    if (tmpCubeData == null) continue;
+
+                    float r = float.Parse(words[1]);
+                    float g = float.Parse(words[2]);
+                    float b = float.Parse(words[3]);
+                    float a = float.Parse(words[4]);
+                    tmpCubeData.color = new Color(r, g, b, a);
+
+                    // Cubeメッシュ生成
+                    var mesh = Mesh.GenerateCube(Vec3.One * 5 * U.cm);
+                    var colorMat = Default.Material.Copy();
+                    colorMat[MatParamName.ColorTint] = tmpCubeData.color;
+                    tmpCubeData.material = colorMat;
+                    tmpCubeData.mesh = mesh;
+                    cubeData.Add(tmpCubeData);
+
+                    float x = (tmpCubeData.pos.x - 2.5f * U.cm) / (5 * U.cm);
+                    float y = (tmpCubeData.pos.y - 2.5f * U.cm) / (5 * U.cm);
+                    float z = (tmpCubeData.pos.z - 2.5f * U.cm) / (5 * U.cm);
+                    painted[(int)x, (int)y, (int)z] = true;
+
+                    tmpCubeData = null;
+                }
+            }
         }
 
         /// <summary>
@@ -285,8 +349,16 @@ namespace StereoKitSample.BoxelPaint
         {
             Platform.FilePicker(PickerMode.Save, file =>
             {
-                Platform.WriteFile(file, "Text for the file.\n- Thanks!");
-            }, null, ".bxp"); // 中身はテキストだがtxtと見分けるため拡張子は独自のもの
+                StringBuilder sb = new StringBuilder("BoxelModeler\n");
+
+                foreach (var data in cubeData)
+                {
+                    sb.Append("p " + data.pos.x + " " + data.pos.y + " " + data.pos.z + "\n");
+                    sb.Append("c " + data.color.r + " " + data.color.g + " " + data.color.b + " " + data.color.a + "\n");
+                }
+
+                Platform.WriteFile(file, sb.ToString());
+            }, null, ".bxm"); // 中身はテキストだがtxtと見分けるため拡張子は独自のもの
         }
 
         /// <summary>
@@ -298,6 +370,9 @@ namespace StereoKitSample.BoxelPaint
             // 一般的なobjのエクスポートで利用できるものではない
             Vec3[] baseVecs_v = new Vec3[]
             {
+                // 以下の場合cubeの原点は(0, 0, 0)だが、
+                // アプリ上で描画したモデル座標の原点に一番近いcubeの原点は(0.025, 0.025, 0.025)なので
+                // エクスポートしたモデルは位置が異なっている（がこのままとしておく）
                 new Vec3( -1.000000f, -1.000000f,  1.000000f ),
                 new Vec3( -1.000000f,  1.000000f,  1.000000f ),
                 new Vec3( -1.000000f, -1.000000f, -1.000000f ),
@@ -355,6 +430,7 @@ namespace StereoKitSample.BoxelPaint
 
             StringBuilder sb = new StringBuilder("# Exported from BoxelModeler\n");
             sb.Append("mtllib " + filename + ".mtl\n");
+            sb.Append("o Boxels");
 
             // cubeData から obj ファイルを生成する
             foreach (var data in cubeData)
