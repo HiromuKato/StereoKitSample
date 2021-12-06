@@ -1,7 +1,9 @@
 ﻿using StereoKit;
+using StereoKit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 #if WINDOWS_UWP
 using Windows.Storage;
@@ -23,17 +25,71 @@ namespace StereoKitSample.BoxelModeler
         private bool[,,] painted;
 
         private Pose menuPose = new Pose(0, 0, -0.5f, Quat.LookDir(0, 0, 1));
+        private Mesh palleteMesh;
+        private Material[] colorMatList;
 
         Color red = new Color(1, 0, 0, 1);
+        Color yellow = new Color(1, 1, 0, 1);
         Color green = new Color(0, 1, 0, 1);
+        Color cyan = new Color(0, 1, 1, 1);
         Color blue = new Color(0, 0, 1, 1);
+        Color magenda = new Color(1, 0, 1, 1);
         Color white = new Color(1, 1, 1, 1);
         Color black = new Color(0, 0, 0, 1);
+
+        HandMenuRadial handMenu;
 
         public void Initialize(List<CubeData> cubeData, bool[,,] painted)
         {
             this.cubeData = cubeData;
             this.painted = painted;
+
+            palleteMesh = Mesh.GenerateCube(Vec3.One * 3 * U.cm);
+            colorMatList = new Material[7];
+            for (int i = 0; i < colorMatList.Length; i++)
+            {
+                colorMatList[i] = Default.Material.Copy();
+            }
+
+            // ラジアルメニュー
+            handMenu = SK.AddStepper(new HandMenuRadial(
+                new HandRadialLayer("Root",
+                    new HandMenuItem("Save", null, OnSaveData),
+                    new HandMenuItem("Load", null, OnLoadData),
+                    new HandMenuItem("About", null, OnAbout),
+                    new HandMenuItem("Cancel", null, null))));
+        }
+
+        bool aboutVisible = false;
+        Pose aboutPose;
+
+        private void OnAbout()
+        {
+            if (!aboutVisible)
+            {
+                aboutPose.position = Input.Head.position + Input.Head.Forward * 0.3f;
+                aboutPose.orientation = Quat.LookAt(aboutPose.position, Input.Head.position);
+            }
+            aboutVisible = true;
+        }
+
+        private void ShowAbout()
+        {
+            if (!aboutVisible)
+            {
+                return;
+            }
+
+            UI.WindowBegin("About", ref aboutPose, new Vec2(20, 0) * U.cm);
+
+            UI.Label("BoxelModeler v0.0.1");
+            UI.HSeparator();
+
+            if (UI.Button("Close"))
+            {
+                aboutVisible = false;
+            }
+            UI.WindowEnd();
         }
 
         /// <summary>
@@ -44,14 +100,31 @@ namespace StereoKitSample.BoxelModeler
             // メニューウィンドウを開始する
             UI.WindowBegin("Menu", ref menuPose, UIWin.Normal);
             {
-                SwatchColor("Red", red, false);
+                SwatchColor("Red", 0, red, false);
                 UI.SameLine();
-                SwatchColor("Green", green, false);
+                SwatchColor("Yellow", 1, yellow, false);
                 UI.SameLine();
-                SwatchColor("Blue", blue, false);
+                SwatchColor("Green", 2, green, false);
                 UI.SameLine();
-                SwatchColor("White", white, false);
+                SwatchColor("Cyan", 3, cyan, false);
                 UI.SameLine();
+                SwatchColor("Blue", 4, blue, false);
+                UI.SameLine();
+                SwatchColor("Magenda", 5, magenda, false);
+                UI.SameLine();
+                SwatchColor("White", 6, white, false);
+
+
+                UI.Space(UI.LineHeight * 0.5f);
+                UI.HSeparator();
+
+                // スライダーの追加
+                UI.Label("Grid", V.XY(5 * U.cm, UI.LineHeight));
+                UI.SameLine();
+                if (UI.HSlider("Grid", ref sliderValue, 2, 8, 1, 16 * U.cm, UIConfirm.Pinch)) { }
+
+                UI.HSeparator();
+
                 //SwatchColor("Erase", black, true);
                 if (UI.Button("Erase"))
                 {
@@ -59,29 +132,7 @@ namespace StereoKitSample.BoxelModeler
                     Default.MaterialHand[MatParamName.ColorTint] = black;
                     isErase = true;
                 }
-
-                UI.Space(UI.LineHeight * 0.5f);
-                UI.HSeparator();
-
-                // ボタンの追加
-                if (UI.Button("Save"))
-                {
-                    OnSaveData("");
-                }
-                // 同じ行にボタンを追加
                 UI.SameLine();
-                if (UI.Button("Load") && !Platform.FilePickerVisible)
-                {
-                    OnLoadData("");
-                }
-                UI.SameLine();
-                if (UI.Button("Export"))
-                {
-                    OnExportObj();
-                }
-
-                UI.HSeparator();
-
                 if (UI.Button("All Clear"))
                 {
                     cubeData.Clear();
@@ -98,31 +149,43 @@ namespace StereoKitSample.BoxelModeler
                     }
                 }
 
+                UI.HSeparator();
 
-                // スライダーの追加
-                UI.Label("Grid", V.XY(5 * U.cm, UI.LineHeight));
+                // ボタンの追加
+                if (UI.Button("Save"))
+                {
+                    OnSaveData();
+                }
+                // 同じ行にボタンを追加
                 UI.SameLine();
-                if (UI.HSlider("Grid", ref sliderValue, 2, 8, 1, 16 * U.cm, UIConfirm.Pinch)) { }
+                if (UI.Button("Load") && !Platform.FilePickerVisible)
+                {
+                    OnLoadData();
+                }
+                UI.SameLine();
+                if (UI.Button("Export"))
+                {
+                    OnExportObj();
+                }
             }
             // メニューウィンドウを終了する
             UI.WindowEnd();
+
+            ShowAbout();
         }
 
         /// <summary>
         /// 見本となるカラーボタンを配置する
         /// </summary>
         /// <param name="id"></param>
-        void SwatchColor(string id, Color color, bool isErase)
+        void SwatchColor(string id, int index, Color color, bool isErase)
         {
-            var mesh = Mesh.GenerateCube(Vec3.One * 3 * U.cm);
-
-            Bounds bounds = UI.LayoutReserve(mesh.Bounds.dimensions.XY);
+            Bounds bounds = UI.LayoutReserve(palleteMesh.Bounds.dimensions.XY);
             bounds.dimensions.z = U.cm * 4;
 
             Matrix cubeTransform = Matrix.TR(bounds.center, Quat.Identity);
-            var colorMat = Default.Material.Copy();
-            colorMat[MatParamName.ColorTint] = color;
-            mesh.Draw(colorMat, cubeTransform);
+            colorMatList[index][MatParamName.ColorTint] = color;
+            palleteMesh.Draw(colorMatList[index], cubeTransform);
 
             BtnState state = UI.VolumeAt(id, bounds, UIConfirm.Push);
 
@@ -146,8 +209,7 @@ namespace StereoKitSample.BoxelModeler
         /// <summary>
         /// データを読み込む
         /// </summary>
-        /// <param name="value"></param>
-        private void OnLoadData(string value)
+        private void OnLoadData()
         {
             Platform.FilePicker(PickerMode.Open, file =>
             {
@@ -232,8 +294,7 @@ namespace StereoKitSample.BoxelModeler
         /// <summary>
         /// データを保存する
         /// </summary>
-        /// <param name="value"></param>
-        private void OnSaveData(string value)
+        private void OnSaveData()
         {
 #if WINDOWS_UWP
             // 公式の処理でセーブできない（OSの不具合？）ため以下暫定処理
@@ -415,10 +476,16 @@ namespace StereoKitSample.BoxelModeler
             matsb.Append("Kd 1.000000 1.000000 1.000000\n");
             matsb.Append("newmtl RedMaterial\n");
             matsb.Append("Kd 1.000000 0.000000 0.000000\n");
+            matsb.Append("newmtl YellowMaterial\n");
+            matsb.Append("Kd 1.000000 1.000000 0.000000\n");
             matsb.Append("newmtl GreenMaterial\n");
             matsb.Append("Kd 0.000000 1.000000 0.000000\n");
+            matsb.Append("newmtl CyanMaterial\n");
+            matsb.Append("Kd 0.000000 1.000000 1.000000\n");
             matsb.Append("newmtl BlueMaterial\n");
             matsb.Append("Kd 0.000000 0.000000 1.000000\n");
+            matsb.Append("newmtl MagendaMaterial\n");
+            matsb.Append("Kd 1.000000 0.000000 1.000000\n");
             SaveTextFileForUWP(".mtl", matsb.ToString(), "color");
 #else
             Platform.FilePicker(PickerMode.Save, file =>
@@ -458,13 +525,25 @@ namespace StereoKitSample.BoxelModeler
             {
                 return "RedMaterial";
             }
+            else if (color.r == 1 && color.g == 1 && color.b == 0)
+            {
+                return "YellowMaterial";
+            }
             else if (color.r == 0 && color.g == 1 && color.b == 0)
             {
                 return "GreenMaterial";
             }
+            else if (color.r == 0 && color.g == 1 && color.b == 1)
+            {
+                return "CyanMaterial";
+            }
             else if (color.r == 0 && color.g == 0 && color.b == 1)
             {
                 return "BlueMaterial";
+            }
+            else if (color.r == 1 && color.g == 0 && color.b == 1)
+            {
+                return "MagendaMaterial";
             }
             return "WhiteMaterial";
         }
