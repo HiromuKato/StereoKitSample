@@ -374,8 +374,6 @@ namespace StereoKitSample.BoxelPaint
             */
 
             // 上記の処理でセーブできない（OSの不具合？）ため以下暫定処理
-#if WINDOWS_UWP
-            // Export
             StringBuilder sb = new StringBuilder("BoxelModeler\n");
             foreach (var data in cubeData)
             {
@@ -383,16 +381,25 @@ namespace StereoKitSample.BoxelPaint
                 sb.Append("c " + data.color.r + " " + data.color.g + " " + data.color.b + " " + data.color.a + "\n");
             }
 
+            SaveTextFileForUWP(".bxm", sb.ToString());
+        }
+
+        private void SaveTextFileForUWP(string ext, string value, string filename = null)
+        {
+#if WINDOWS_UWP
             try
             {
                 Task.Run(async () =>
                 {
                     // アプリ内に保存
-                    DateTime dt = DateTime.Now;
-                    string name = dt.ToString($"{dt:yyyyMMddHHmmss}");
+                    if (filename == null)
+                    {
+                        DateTime dt = DateTime.Now;
+                        filename = dt.ToString($"{dt:yyyyMMddHHmmss}");
+                    }
                     var storageFolder = ApplicationData.Current.LocalFolder;
-                    var file = await storageFolder.CreateFileAsync(name + ".bxm", CreationCollisionOption.ReplaceExisting);
-                    await FileIO.WriteTextAsync(file, sb.ToString());
+                    var file = await storageFolder.CreateFileAsync(filename + ext, CreationCollisionOption.ReplaceExisting);
+                    await FileIO.WriteTextAsync(file, value);
 
                     // アプリ内のデータをDocuments/BoxelModelerにコピー
                     var documentsFolder = KnownFolders.DocumentsLibrary;
@@ -408,7 +415,6 @@ namespace StereoKitSample.BoxelPaint
             {
             }
 #endif
-
         }
 
         /// <summary>
@@ -474,13 +480,13 @@ namespace StereoKitSample.BoxelPaint
                 new Vec3(6, 6, 6),
             };
 
-            string filename = "test";
+            string filename = "color";
             int index = 0;
             string matName = "WhiteMaterial";
 
             StringBuilder sb = new StringBuilder("# Exported from BoxelModeler\n");
             sb.Append("mtllib " + filename + ".mtl\n");
-            sb.Append("o Boxels");
+            sb.Append("o Boxels\n");
 
             // cubeData から obj ファイルを生成する
             foreach (var data in cubeData)
@@ -522,10 +528,27 @@ namespace StereoKitSample.BoxelPaint
 
             Log.Info(sb.ToString());
 
+            /*
             Platform.FilePicker(PickerMode.Save, file =>
             {
                 Platform.WriteFile(file + ".obj", sb.ToString());
             }, null, ".obj");
+            */
+
+            // 上記の処理でセーブできない（OSの不具合？）ため以下暫定処理
+            SaveTextFileForUWP(".obj", sb.ToString());
+
+            // マテリアルファイルの出力
+            StringBuilder matsb = new StringBuilder();
+            matsb.Append("newmtl WhiteMaterial\n");
+            matsb.Append("Kd 1.000000 1.000000 1.000000\n");
+            matsb.Append("newmtl RedMaterial\n");
+            matsb.Append("Kd 1.000000 0.000000 0.000000\n");
+            matsb.Append("newmtl GreenMaterial\n");
+            matsb.Append("Kd 0.000000 1.000000 0.000000\n");
+            matsb.Append("newmtl BlueMaterial\n");
+            matsb.Append("Kd 0.000000 0.000000 1.000000\n");
+            SaveTextFileForUWP(".mtl", matsb.ToString(), "color");
         }
 
         private string Calc_v(Vec3 v, Vec3 pos, int index)
