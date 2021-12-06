@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.Storage;
 using StereoKit;
+
+#if WINDOWS_UWP
+using Windows.Storage;
+#endif
 
 namespace StereoKitSample.BoxelPaint
 {
@@ -358,7 +361,17 @@ namespace StereoKitSample.BoxelPaint
         /// <param name="value"></param>
         private void OnSaveData(string value)
         {
-            /*
+#if WINDOWS_UWP
+            // 公式の処理でセーブできない（OSの不具合？）ため以下暫定処理
+            StringBuilder sb = new StringBuilder("BoxelModeler\n");
+            foreach (var data in cubeData)
+            {
+                sb.Append("p " + data.pos.x + " " + data.pos.y + " " + data.pos.z + "\n");
+                sb.Append("c " + data.color.r + " " + data.color.g + " " + data.color.b + " " + data.color.a + "\n");
+            }
+
+            SaveTextFileForUWP(".bxm", sb.ToString());
+#else
             Platform.FilePicker(PickerMode.Save, file =>
             {
                 StringBuilder sb = new StringBuilder("BoxelModeler\n");
@@ -371,17 +384,7 @@ namespace StereoKitSample.BoxelPaint
 
                 Platform.WriteFile(file + ".bxm", sb.ToString());
             }, null, ".bxm"); // 中身はテキストだがtxtと見分けるため拡張子は独自のもの
-            */
-
-            // 上記の処理でセーブできない（OSの不具合？）ため以下暫定処理
-            StringBuilder sb = new StringBuilder("BoxelModeler\n");
-            foreach (var data in cubeData)
-            {
-                sb.Append("p " + data.pos.x + " " + data.pos.y + " " + data.pos.z + "\n");
-                sb.Append("c " + data.color.r + " " + data.color.g + " " + data.color.b + " " + data.color.a + "\n");
-            }
-
-            SaveTextFileForUWP(".bxm", sb.ToString());
+#endif
         }
 
         private void SaveTextFileForUWP(string ext, string value, string filename = null)
@@ -528,14 +531,8 @@ namespace StereoKitSample.BoxelPaint
 
             Log.Info(sb.ToString());
 
-            /*
-            Platform.FilePicker(PickerMode.Save, file =>
-            {
-                Platform.WriteFile(file + ".obj", sb.ToString());
-            }, null, ".obj");
-            */
-
-            // 上記の処理でセーブできない（OSの不具合？）ため以下暫定処理
+#if WINDOWS_UWP
+            // 公式の処理でセーブできない（OSの不具合？）ため以下暫定処理
             SaveTextFileForUWP(".obj", sb.ToString());
 
             // マテリアルファイルの出力
@@ -549,6 +546,12 @@ namespace StereoKitSample.BoxelPaint
             matsb.Append("newmtl BlueMaterial\n");
             matsb.Append("Kd 0.000000 0.000000 1.000000\n");
             SaveTextFileForUWP(".mtl", matsb.ToString(), "color");
+#else
+            Platform.FilePicker(PickerMode.Save, file =>
+            {
+                Platform.WriteFile(file + ".obj", sb.ToString());
+            }, null, ".obj");
+#endif
         }
 
         private string Calc_v(Vec3 v, Vec3 pos, int index)
