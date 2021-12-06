@@ -165,19 +165,29 @@ namespace StereoKitSample.BoxelPaint
                 if (UI.Button("White")) { selectedColor = white; isErase = false; }
                 UI.SameLine();
                 if (UI.Button("Erase")) { selectedColor = black; isErase = true; }
+
                 UI.HSeparator();
 
                 // ボタンの追加
                 if (UI.Button("Save"))
                 {
+                    OnSaveData("");
                 }
                 // 同じ行にボタンを追加
                 UI.SameLine();
-                if (UI.Button("Load"))
+                if (UI.Button("Load") && !Platform.FilePickerVisible)
                 {
+                    //Platform.FilePicker(PickerMode.Open, OnLoadData, null, ".obj");
+                    OnLoadData("");
+                }
+                UI.SameLine();
+                if (UI.Button("Export"))
+                {
+                    OnExportObj();
                 }
 
-                UI.SameLine();
+                UI.HSeparator();
+
                 if (UI.Button("All Clear"))
                 {
                     cubeData.Clear();
@@ -249,6 +259,79 @@ namespace StereoKitSample.BoxelPaint
                 }
             }
             //Hierarchy.Pop();
+        }
+
+        /// <summary>
+        /// データを読み込む
+        /// </summary>
+        /// <param name="value"></param>
+        private void OnLoadData(string value)
+        {
+            Platform.FilePicker(PickerMode.Open, file =>
+            {
+                if (Platform.ReadFile(file, out string text))
+                {
+                    Log.Info(text);
+                }
+            }, null, ".bxp");
+        }
+
+        /// <summary>
+        /// データを保存する
+        /// </summary>
+        /// <param name="value"></param>
+        private void OnSaveData(string value)
+        {
+            Platform.FilePicker(PickerMode.Save, file =>
+            {
+                Platform.WriteFile(file, "Text for the file.\n- Thanks!");
+            }, null, ".bxp"); // 中身はテキストだがtxtと見分けるため拡張子は独自のもの
+        }
+
+        /// <summary>
+        /// objフォーマットのデータをエクスポートする
+        /// </summary>
+        private void OnExportObj()
+        {
+            // cubeData から obj ファイルを生成する
+            string modelData =
+@"# Blender v2.79 (sub 0) OBJ File: ''
+# www.blender.org
+mtllib cube_obj_test.mtl
+o Cube_Cube.001
+v -1.000000 -1.000000 1.000000
+v -1.000000 1.000000 1.000000
+v -1.000000 -1.000000 -1.000000
+v -1.000000 1.000000 -1.000000
+v 1.000000 -1.000000 1.000000
+v 1.000000 1.000000 1.000000
+v 1.000000 -1.000000 -1.000000
+v 1.000000 1.000000 -1.000000
+vn -1.0000 0.0000 0.0000
+vn 0.0000 0.0000 -1.0000
+vn 1.0000 0.0000 0.0000
+vn 0.0000 0.0000 1.0000
+vn 0.0000 -1.0000 0.0000
+vn 0.0000 1.0000 0.0000
+usemtl None
+s off
+f 2//1 3//1 1//1
+f 4//2 7//2 3//2
+f 8//3 5//3 7//3
+f 6//4 1//4 5//4
+f 7//5 1//5 3//5
+f 4//6 6//6 8//6
+f 2//1 4//1 3//1
+f 4//2 8//2 7//2
+f 8//3 6//3 5//3
+f 6//4 2//4 1//4
+f 7//5 5//5 1//5
+f 4//6 2//6 6//6";
+
+            Platform.FilePicker(PickerMode.Save, file =>
+            {
+                Platform.WriteFile(file, modelData);
+            }, null, ".obj");
         }
 
     } // class BoxelPaintApp
