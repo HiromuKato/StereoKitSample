@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
+using System.Threading.Tasks;
+using Windows.Storage;
 using StereoKit;
 
 namespace StereoKitSample.BoxelPaint
@@ -297,7 +301,16 @@ namespace StereoKitSample.BoxelPaint
 
             for (int i = 0; i < lines.Length; i++)
             {
-                if (i == 0) continue;
+                if (i == 0)
+                {
+                    if (lines[i] != "BoxelModeler")
+                    {
+                        // 不正なファイル
+                        Log.Err("Invalid file!");
+                        return;
+                    }
+                    continue;
+                }
 
                 var line = lines[i];
                 var words = line.Split(' ');
@@ -310,8 +323,6 @@ namespace StereoKitSample.BoxelPaint
                     float y = float.Parse(words[2]);
                     float z = float.Parse(words[3]);
                     tmpCubeData.pos = new Vec3(x, y, z);
-
-                    // TODO :  painted[x, y, z] = true の設定
                 }
                 else if (words[0] == "c")
                 {
@@ -347,6 +358,7 @@ namespace StereoKitSample.BoxelPaint
         /// <param name="value"></param>
         private void OnSaveData(string value)
         {
+            /*
             Platform.FilePicker(PickerMode.Save, file =>
             {
                 StringBuilder sb = new StringBuilder("BoxelModeler\n");
@@ -357,8 +369,46 @@ namespace StereoKitSample.BoxelPaint
                     sb.Append("c " + data.color.r + " " + data.color.g + " " + data.color.b + " " + data.color.a + "\n");
                 }
 
-                Platform.WriteFile(file, sb.ToString());
+                Platform.WriteFile(file + ".bxm", sb.ToString());
             }, null, ".bxm"); // 中身はテキストだがtxtと見分けるため拡張子は独自のもの
+            */
+
+            // 上記の処理でセーブできない（OSの不具合？）ため以下暫定処理
+#if WINDOWS_UWP
+            // Export
+            StringBuilder sb = new StringBuilder("BoxelModeler\n");
+            foreach (var data in cubeData)
+            {
+                sb.Append("p " + data.pos.x + " " + data.pos.y + " " + data.pos.z + "\n");
+                sb.Append("c " + data.color.r + " " + data.color.g + " " + data.color.b + " " + data.color.a + "\n");
+            }
+
+            try
+            {
+                Task.Run(async () =>
+                {
+                    // アプリ内に保存
+                    DateTime dt = DateTime.Now;
+                    string name = dt.ToString($"{dt:yyyyMMddHHmmss}");
+                    var storageFolder = ApplicationData.Current.LocalFolder;
+                    var file = await storageFolder.CreateFileAsync(name + ".bxm", CreationCollisionOption.ReplaceExisting);
+                    await FileIO.WriteTextAsync(file, sb.ToString());
+
+                    // アプリ内のデータをDocuments/BoxelModelerにコピー
+                    var documentsFolder = KnownFolders.DocumentsLibrary;
+                    var files = await storageFolder.GetFilesAsync();
+                    var targetFolder = await ((StorageFolder)documentsFolder).CreateFolderAsync("BoxelModeler", CreationCollisionOption.ReplaceExisting);
+                    foreach (var f in files)
+                    {
+                        await f.CopyAsync(targetFolder);
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+            }
+#endif
+
         }
 
         /// <summary>
@@ -473,9 +523,9 @@ namespace StereoKitSample.BoxelPaint
             Log.Info(sb.ToString());
 
             Platform.FilePicker(PickerMode.Save, file =>
-                {
-                    Platform.WriteFile(file + ".obj", sb.ToString());
-                }, null, ".obj");
+            {
+                Platform.WriteFile(file + ".obj", sb.ToString());
+            }, null, ".obj");
         }
 
         private string Calc_v(Vec3 v, Vec3 pos, int index)
