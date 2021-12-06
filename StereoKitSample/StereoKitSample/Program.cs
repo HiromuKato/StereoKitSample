@@ -1,6 +1,7 @@
 ﻿using StereoKit;
 using System;
 using StereoKitSample.Samples;
+using StereoKitSample.BoxelModeler;
 
 namespace StereoKitSample
 {
@@ -36,7 +37,8 @@ namespace StereoKitSample
             }
 
             // サンプルクラスの生成
-            var app = new FirstApp(); // ★ここを確認したいサンプルのクラスに変更する
+            //var app = new FirstApp(); // ★ここを確認したいサンプルのクラスに変更する
+            var app = new BoxelModelerApp();
             app.Initialize();
             Action step = app.Update;
 
