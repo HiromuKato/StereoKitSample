@@ -15,7 +15,8 @@ namespace StereoKitSample.Samples
         {
             // モデルの読み込み
             model = Model.FromFile("DamagedHelmet.gltf");
-            pose = new Pose(0, 0, -0.5f, Quat.Identity);
+            pose.position = Input.Head.position + Input.Head.Forward * 0.3f;
+            pose.orientation = Quat.LookAt(pose.position, Input.Head.position);
         }
 
         public void Update()
