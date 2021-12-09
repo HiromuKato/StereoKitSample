@@ -16,6 +16,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="StereoKitSample_UWP\**" />
+    <EmbeddedResource Remove="StereoKitSample_UWP\**" />
+    <None Remove="StereoKitSample_UWP\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Assets\BlipNoise.wav" />
     <None Remove="Assets\Clipboard.glb" />
     <None Remove="Assets\Cosmonaut.glb" />
@@ -118,6 +124,10 @@
     <Content Include="Assets\Wand.glb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="StereoKitSample_UWP\**" />
   </ItemGroup>
 
 </Project>

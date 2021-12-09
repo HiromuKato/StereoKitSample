@@ -3,18 +3,46 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31321.278
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StereoKitSample", "StereoKitSample\StereoKitSample.csproj", "{32645350-B938-4221-AE18-9D2829A19B43}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StereoKitSample", "StereoKitSample\StereoKitSample.csproj", "{32645350-B938-4221-AE18-9D2829A19B43}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StereoKitSample_UWP", "StereoKitSample\StereoKitSample_UWP\StereoKitSample_UWP.csproj", "{C8AC13E8-2D2F-413B-9FEC-B8C168BC299F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|ARM64 = Debug|ARM64
+		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
+		Release|ARM64 = Release|ARM64
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{32645350-B938-4221-AE18-9D2829A19B43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{32645350-B938-4221-AE18-9D2829A19B43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32645350-B938-4221-AE18-9D2829A19B43}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{32645350-B938-4221-AE18-9D2829A19B43}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{32645350-B938-4221-AE18-9D2829A19B43}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{32645350-B938-4221-AE18-9D2829A19B43}.Debug|x64.Build.0 = Debug|Any CPU
 		{32645350-B938-4221-AE18-9D2829A19B43}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{32645350-B938-4221-AE18-9D2829A19B43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32645350-B938-4221-AE18-9D2829A19B43}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{32645350-B938-4221-AE18-9D2829A19B43}.Release|ARM64.Build.0 = Release|Any CPU
+		{32645350-B938-4221-AE18-9D2829A19B43}.Release|x64.ActiveCfg = Release|Any CPU
+		{32645350-B938-4221-AE18-9D2829A19B43}.Release|x64.Build.0 = Release|Any CPU
+		{C8AC13E8-2D2F-413B-9FEC-B8C168BC299F}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{C8AC13E8-2D2F-413B-9FEC-B8C168BC299F}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{C8AC13E8-2D2F-413B-9FEC-B8C168BC299F}.Debug|ARM64.Build.0 = Debug|ARM64
+		{C8AC13E8-2D2F-413B-9FEC-B8C168BC299F}.Debug|ARM64.Deploy.0 = Debug|ARM64
+		{C8AC13E8-2D2F-413B-9FEC-B8C168BC299F}.Debug|x64.ActiveCfg = Debug|x64
+		{C8AC13E8-2D2F-413B-9FEC-B8C168BC299F}.Debug|x64.Build.0 = Debug|x64
+		{C8AC13E8-2D2F-413B-9FEC-B8C168BC299F}.Debug|x64.Deploy.0 = Debug|x64
+		{C8AC13E8-2D2F-413B-9FEC-B8C168BC299F}.Release|Any CPU.ActiveCfg = Release|x64
+		{C8AC13E8-2D2F-413B-9FEC-B8C168BC299F}.Release|ARM64.ActiveCfg = Release|ARM64
+		{C8AC13E8-2D2F-413B-9FEC-B8C168BC299F}.Release|ARM64.Build.0 = Release|ARM64
+		{C8AC13E8-2D2F-413B-9FEC-B8C168BC299F}.Release|ARM64.Deploy.0 = Release|ARM64
+		{C8AC13E8-2D2F-413B-9FEC-B8C168BC299F}.Release|x64.ActiveCfg = Release|x64
+		{C8AC13E8-2D2F-413B-9FEC-B8C168BC299F}.Release|x64.Build.0 = Release|x64
+		{C8AC13E8-2D2F-413B-9FEC-B8C168BC299F}.Release|x64.Deploy.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
