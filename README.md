@@ -1,16 +1,35 @@
 # StereoKitSample
 
-[StereoKit](https://github.com/maluoi/StereoKit) を利用した、部品として利用できそうなアプリのサンプル集です。
+[StereoKit](https://github.com/maluoi/StereoKit) を利用した、そのまま部品として利用できそうなアプリのサンプル集です。
 
 ## 動作確認方法
-Program.cs の以下行を Samples フォルダ配下にある確認したいクラス名に変更してビルドすることで動作確認できます。
-```
+ソリューション内には、.NET Core プロジェクトと UWP プロジェクトが含まれていますが UWP プロジェクト内のほとんどのファイルは .NET Core プロジェクトへのリンクとなっています。
+
+PC で動作確認する場合は .NET プロジェクトでも UWP プロジェクトでも可能です。
+HoloLens 2 実機で動作確認する場合は StereoKitSample_UWP プロジェクトでアーキテクチャを ARM64 にしてビルド・デプロイしてください。
+
+Program.cs の以下行を Samples フォルダ配下にある確認したいクラス名に変更してビルドすることで様々な機能について動作確認できます。
+
+``` cs
 var app = new FirstApp(); // ★ここを確認したいサンプルのクラスに変更する
 ```
 
+## PCでの操作方法
+
+| 操作 | シミュレーション内容 |
+----|---- 
+| マウスの移動 | 手の上下左右移動 |
+| マウスホイール | 手の奥行き移動 |
+| マウスの左クリック | つかむ |
+| マウスの右クリック | つつく |
+| マウスの左クリック + 右クリック | 手を閉じる |
+| Shift(またはCaps Lock) + マウスの右クリック + マウスの移動 | 頭の回転 |
+| Shift(またはCaps Lock) + W A S D Q Eキー | 頭の移動 |
+| Alt + マウス操作 | アイトラッキングのシミュレート |
+
 ## サンプル
 
-以下のサンプルを用意しています。StereoKit リポジトリ配下にもデモコンテンツが用意されておりそれらと同等の物も含まれていますが、日本語のコメントを付けたり、より部品として使いやすいように最低限の内容に絞ったりしています。
+以下はサンプルの一覧です。StereoKit リポジトリ配下にも[デモコンテンツ](https://github.com/maluoi/StereoKit/tree/master/Examples)が用意されておりそれらと同等のものも含まれていますが、日本語のコメントを付けたり、より部品として使いやすいように最低限の内容に絞ったりしています。
 
 - [ChangeMaterialApp](./StereoKitSample/StereoKitSample/Samples/ChangeMaterialApp.cs)
   - マテリアルを変更するサンプル
